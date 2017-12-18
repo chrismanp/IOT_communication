@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package video_analytic;
+
+service VideoAnalytic {
+  // Peform object detection
+  // Input Image message
+  // Return bounding box, index, and confidence level
+
+  rpc DetectOneObject(Image) returns (ObjDetectData) {}
+  rpc DetectOneObject_tensorflow(Image) returns (ObjDetectData) {}
+
+  }
+
+// Input image for processing
+message Image 
+{
+	int32 width = 1;
+	int32 height = 2;
+	int32 depth = 3;
+	string dtype = 4;
+	bytes imagedata = 5;
+}
+
+// Bouding box of the object
+message BoundingBox
+{
+	int32 x=1;
+	int32 y=2;
+	int32 width=3;
+	int32 height=4;
+}
+// The classification output
+message Index
+{
+	int32 value= 1;
+}
+// Confidence level
+message Confidence
+{
+	float conf = 1;
+}
+
+message ObjDetectData
+{
+	BoundingBox bbox = 1;
+	Index index =2;
+	Confidence confidence = 3;
+}
