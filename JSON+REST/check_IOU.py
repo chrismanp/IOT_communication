@@ -4,16 +4,17 @@ import argparse;
 import numpy as np;
 import matplotlib.pyplot as plt
 
-SCRATCH_DIR = "/scratch/midway/chrismapakha/"
+SCRATCH_DIR = "/home/mnt_sdc/scratch_data/"
 
-def calculate_IOU(file1_txt, file2_txt):
+def calculate_IOU(file1_txt, file2_txt, outputdir):
 	#print "file1_txt : " + file1_txt
 	#print "file2_txt : " + file2_txt 
+	cntfilename = file2_txt.split(".")[0] + "_positive_negative_cnt.log"
 
 
 	file1 = open(file1_txt, "r");
 	file2 = open(file2_txt, "r");
-
+	cntfile = open(cntfilename, "w");
 
 	
 	cnt = 0;
@@ -31,6 +32,8 @@ def calculate_IOU(file1_txt, file2_txt):
 	#tn = [];
 	fn = [];
 	truthvalue = [];
+
+	cntfile.write("Frame" + "," + "TruePositive" +"," + "FalsePositive" + "," + "FalseNegative"+ ","+ "#ProposedRegion" + "," + "#ActualRegion" + "\n");
 
 	line2_list = file2.readlines()
 	for line1 in iter(file1):
@@ -72,6 +75,7 @@ def calculate_IOU(file1_txt, file2_txt):
 				#if(line1_arr[4] != line2_arr[4]):
 				#	continue;
 
+
 				
 
 				line1_arr = [float(x) for x in line1_arr2[1:5]]
@@ -83,8 +87,18 @@ def calculate_IOU(file1_txt, file2_txt):
 				y_1 = max(line1_arr[1], line2_arr[1]);
 				y_2 = min(line1_arr[3], line2_arr[3]);
 
-				area_intersection = (y_2 - y_1) * (x_2 - x_1)
 
+				if(y_2 - y_1 <= 0):
+					continue;
+				if(x_2 - x_1 <= 0):
+					continue;
+
+				area_intersection = (y_2 - y_1) * (x_2 - x_1)
+				print "line1_arr"
+				print line1_arr
+				print line2_arr
+				print "area : "
+				print area_intersection
 				#print "-----------------------"
 				#print (area_intersection)
 
@@ -118,7 +132,7 @@ def calculate_IOU(file1_txt, file2_txt):
 		precision_sum.append(precision_total);
 		recall_total = recall_total + recall;
 		recall_sum.append(recall_total);
-
+		cntfile.write(str(idx) + "," + str(cnttrue) +"," + str(allresult-cnttrue) + "," + str(trueresult-cnttrue)+ ","+str(allresult) + "," +str(trueresult) + "\n")
 		print str(idx) + " Precision over time : " + str(precision_total)
 		#recall    = float(cnttrue)/trueresult
 		print str(idx) + " Recall over time : " + str(recall_total); 
@@ -144,7 +158,7 @@ def calculate_IOU(file1_txt, file2_txt):
 	plt.plot(range(1, idx+1), fp, 'ro', label="False Positive")
 
 	plt.legend(loc="best")
-	pdffilename = SCRATCH_DIR + file2_txt.split(".")[0] + ".pdf"
+	pdffilename = file2_txt.split(".")[0] + ".pdf"
 	print pdffilename;
 	plt.savefig(pdffilename)
 	#plt.show();
@@ -160,7 +174,7 @@ def calculate_IOU(file1_txt, file2_txt):
 	plt.plot(range(1, idx+1), recall_sum, 'r', label="Recall")
 
 	plt.legend(loc="best")
-	pdffilename = SCRATCH_DIR + file2_txt.split(".")[0] +"precision_recall" + ".pdf"
+	pdffilename = file2_txt.split(".")[0] +"precision_recall" + ".pdf"
 	print pdffilename;
 	plt.savefig(pdffilename)
 	#plt.show();
@@ -168,6 +182,7 @@ def calculate_IOU(file1_txt, file2_txt):
 
 	file1.close();
 	file2.close();
+	cntfile.close();
 
 	#print "cnt : " + str(cnt );
 	#return float(cnttrue)/cnt	

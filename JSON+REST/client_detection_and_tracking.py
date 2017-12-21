@@ -26,7 +26,7 @@ import grpc
 
 import check_IOU
 
-SCRATCH_DIR = "/scratch/midway/chrismapakha/"
+SCRATCH_DIR = "/home/mnt_sdc/scratch_data/"
 
 (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
 
@@ -34,7 +34,7 @@ SCRATCH_DIR = "/scratch/midway/chrismapakha/"
 # Set up tracker.
 # Instead of MIL, you can also use
 tracker_types = ['BOOSTING', 'MIL','KCF', 'TLD', 'MEDIANFLOW', 'GOTURN']
-tracker_type = tracker_types[0]
+tracker_type = tracker_types[2]
 
 tracker = []
 for i in range(0,10):
@@ -267,6 +267,8 @@ def frameprocessing(frame, prevframe, tracker, label, local_tracker, s, outputfi
 	global perframeTimes;
 	global cpupercent_total;
 	global memorypercent_total;
+	global confidence_arr_global;
+	global index_arr_global;
 	perframeTimes_s = time.time();
 	numberofframes = numberofframes + 1;
 
@@ -305,7 +307,7 @@ def frameprocessing(frame, prevframe, tracker, label, local_tracker, s, outputfi
 			numberoftracking = numberoftracking + 1;
 			print "Total time for tracking one object = " + str(tracktime_e - tracktime_s);
 
-			ok_arr.append(ok)
+			ok_arr.append(True)
 			bbox_arr.append(bbox)
 	else:
 		ok_arr.append(False);
@@ -353,6 +355,7 @@ def frameprocessing(frame, prevframe, tracker, label, local_tracker, s, outputfi
 				index_arr.append(bbox_label[i][4])
 
  				tracker[i].init(frame, bbox)
+ 				ok, bbox_tmp = object_tracking(frame, tracker[i]);
 
 			#client_server_e = time.time();
 			objdetectionTimes = objdetectionTimes + (client_server_e - client_server_s);
@@ -381,7 +384,7 @@ def frameprocessing(frame, prevframe, tracker, label, local_tracker, s, outputfi
 
 	#trackTimer = trackTimer + 1/fps
 	
-	if(len(confidence_arr)) != 0):
+	if(len(confidence_arr) != 0):
 		confidence_arr_global = confidence_arr;
 		index_arr_global = index_arr;
 
@@ -404,7 +407,7 @@ def frameprocessing(frame, prevframe, tracker, label, local_tracker, s, outputfi
 				startX = int ( bbox_arr[i][0] );
 				y = int (bbox_arr[i][1] - 15) if bbox_arr[i][1] - 15 > 15 else int(bbox_arr[i][1] + 15)
 				#label = str(bbox_area);
-				label = str(CLASSES[int(index_arr_global[i])) + " - " +str(confidence_arr_global[i]) + "%";
+				label = str(CLASSES[int(index_arr_global[i])]) + " - " +str(confidence_arr_global[i]) + "%";
 				cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[0], 2)
 
 				outputfile.write("," + str(index_arr_global[i]) + "," + str(confidence_arr_global[i]))
@@ -431,7 +434,8 @@ def frameprocessing(frame, prevframe, tracker, label, local_tracker, s, outputfi
 	perframeTimes_e = time.time();
 	perframeTimes = perframeTimes + perframeTimes_e - perframeTimes_s;
 
-	imagename = SCRATCH_DIR + "image_dir/" +str(args["period"]) + str(numberofframes) + "_.bmp"
+	imagename = SCRATCH_DIR + args["directory_output"] + "image_dir/" +str(args["period"]) + str(numberofframes) + "_.bmp"
+	print imagename
 	cv2.imwrite(imagename, frame);
 
 	#cv2.imshow('image',frame)
@@ -469,12 +473,12 @@ def object_detection(s, frame, iframe, bbox_data):
 if __name__ == "__main__":
 
 	# If want to read from file
-	file_baseline  = open(SCRATCH_DIR + args["basefile"], "r");
+	file_baseline  = open(args["basefile"], "r");
 	bbox_data = np.array(file_baseline.readlines());
 
 	myStartTime = time.time();
 
-	white_output = SCRATCH_DIR + args["output_video"]
+	white_output = SCRATCH_DIR + args["directory_output"] + args["output_video"]
 	clip1 = VideoFileClip(SCRATCH_DIR + args["input_video"]);
 
 	frame = clip1.get_frame(0);
@@ -546,7 +550,7 @@ if __name__ == "__main__":
 		print "FrameRate : " + str(numberofframes/perframeTimes)
 	
 	#if not args["baseline"]:
-	print "Accuracy : " + str(check_IOU.calculate_IOU(args["basefile"], outputfilename));
+	print "Accuracy : " + str(check_IOU.calculate_IOU(args["basefile"], outputfilename, args["directory_output"]));
 	print "Initialize time : " + str(initTime_e - initTime_s);
 
 	sys.exit();

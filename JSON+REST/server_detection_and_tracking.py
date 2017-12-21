@@ -24,7 +24,7 @@ from moviepy.editor import VideoFileClip
 # Set up tracker.
 # Instead of MIL, you can also use
 tracker_types = ['BOOSTING', 'MIL','KCF', 'TLD', 'MEDIANFLOW', 'GOTURN']
-tracker_type = tracker_types[4]
+tracker_type = tracker_types[2]
 
 if int(minor_ver) < 3:
 	tracker = cv2.Tracker_create(tracker_type)
@@ -57,6 +57,8 @@ ap.add_argument("-b", "--buffer", type=int, default=32,
 	help="max buffer size")
 ap.add_argument("-s", "--server",default="10.1.1.3:9999",
 	help="location of the server")
+ap.add_argument("-a", "--areathreshold", type=int, default=2800,
+	help="Area threshold")
 args = vars(ap.parse_args())
 
 #####################################################################
@@ -140,8 +142,8 @@ def object_detection(frame):
 			#y = startY - 15 if startY - 15 > 15 else startY + 15
 			#cv2.putText(frame, label, (startX, y),
 			#	cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
-			if True:
-			#if(myarea >= 2700):
+			
+			if(myarea >= args["areathreshold"]):
 				list_of_obj.append([float(startX), float(startY), float(endX-startX), float(endY-startY), float(idx), float(confidence)])
 
 	processingtimeusingtime = time.time() - stime
