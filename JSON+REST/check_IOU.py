@@ -72,8 +72,8 @@ def calculate_IOU(file1_txt, file2_txt, outputdir):
 				line1_arr2 = line1_bigarr_element.split(",")
 				line2_arr2 = line2_bigarr_element.split(",")
 
-				#if(line1_arr[4] != line2_arr[4]):
-				#	continue;
+				if(line1_arr2[5] != line2_arr2[5]):
+					continue;
 
 
 				
@@ -94,11 +94,11 @@ def calculate_IOU(file1_txt, file2_txt, outputdir):
 					continue;
 
 				area_intersection = (y_2 - y_1) * (x_2 - x_1)
-				print "line1_arr"
-				print line1_arr
-				print line2_arr
-				print "area : "
-				print area_intersection
+				#print "line1_arr"
+				#print line1_arr
+				#print line2_arr
+				#print "area : "
+				#print area_intersection
 				#print "-----------------------"
 				#print (area_intersection)
 
@@ -121,9 +121,9 @@ def calculate_IOU(file1_txt, file2_txt, outputdir):
 
 
 		precision = float(cnttrue)/allresult
-		print str(idx) + " Precision  : " + str(precision)
+		#print str(idx) + " Precision  : " + str(precision)
 		recall    = float(cnttrue)/trueresult
-		print str(idx) + " Recall : " + str(recall);
+		#print str(idx) + " Recall : " + str(recall);
 
 		#precision_overtime = 0.5 * precision_overtime + 0.5 * precision
 		#recall_overtime = 0.5 * recall_overtime + 0.5 * recall
@@ -133,9 +133,9 @@ def calculate_IOU(file1_txt, file2_txt, outputdir):
 		recall_total = recall_total + recall;
 		recall_sum.append(recall_total);
 		cntfile.write(str(idx) + "," + str(cnttrue) +"," + str(allresult-cnttrue) + "," + str(trueresult-cnttrue)+ ","+str(allresult) + "," +str(trueresult) + "\n")
-		print str(idx) + " Precision over time : " + str(precision_total)
+		#print str(idx) + " Precision over time : " + str(precision_total)
 		#recall    = float(cnttrue)/trueresult
-		print str(idx) + " Recall over time : " + str(recall_total); 
+		#print str(idx) + " Recall over time : " + str(recall_total); 
 
 		
 			
@@ -145,8 +145,10 @@ def calculate_IOU(file1_txt, file2_txt, outputdir):
 	recall_avg = recall_total/idx;	
 	print "Recall avg = " + str(recall_avg);
 
-	F1_score = 2.0 * precision_avg * recall_avg /(precision_avg + recall_avg);
-
+	if(precision_avg+recall_avg != 0):
+		F1_score = 2.0 * precision_avg * recall_avg /(precision_avg + recall_avg);
+	else:
+		F1_score = 0;
 	# Plot the image
 	
 	plt.title("Frame vs Metric")
@@ -159,7 +161,7 @@ def calculate_IOU(file1_txt, file2_txt, outputdir):
 
 	plt.legend(loc="best")
 	pdffilename = file2_txt.split(".")[0] + ".pdf"
-	print pdffilename;
+	#print pdffilename;
 	plt.savefig(pdffilename)
 	#plt.show();
 
@@ -175,7 +177,7 @@ def calculate_IOU(file1_txt, file2_txt, outputdir):
 
 	plt.legend(loc="best")
 	pdffilename = file2_txt.split(".")[0] +"precision_recall" + ".pdf"
-	print pdffilename;
+	#print pdffilename;
 	plt.savefig(pdffilename)
 	#plt.show();
 	
